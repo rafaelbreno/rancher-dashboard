@@ -1,6 +1,7 @@
 name: Create UI Tag
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - 'v*'  # This will trigger on any tag starting with 'v'
