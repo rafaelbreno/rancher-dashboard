@@ -17,14 +17,9 @@ jobs:
     - name: Get the version
       id: get_version
       env:
-        GITHUB_REF: ${{ github.ref_name }}
+        GITHUB_REF: ${{ github.ref }}
       run: | 
-        echo "ref_name: ${{ github.ref_name }}"
-        echo "ref: ${{ github.ref }}"
-        echo "head_ref: ${{ github.head_ref }}"
-        echo "base_ref: ${{ github.base_ref }}"
-        echo "action_ref: ${{ github.action_ref }}"
-        echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
+        echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
     - name: Create tag in target repository
       env:
@@ -35,5 +30,5 @@ jobs:
         git config --global user.email 'action@github.com'
         git clone https://github.com/${TARGET_REPO}.git target_repo
         cd target_repo
-        git tag ${{ steps.get_version.outputs.VERSION }}
-        git push origin ${{ steps.get_version.outputs.VERSION }}
+        git tag $VERSION
+        git push origin $VERSION
