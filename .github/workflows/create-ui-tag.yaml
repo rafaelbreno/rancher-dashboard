@@ -1,6 +1,12 @@
 name: Create UI Tag
 
 on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        type: string
+        description: "e.g: v2.8.4"
+        required: true
   push:
     tags:
       - 'v*'  # This will trigger on any tag starting with 'v'
@@ -17,7 +23,8 @@ jobs:
     - name: Get the version
       id: get_version
       env:
-        GITHUB_REF: ${{ github.ref }}
+        #GITHUB_REF: ${{ github.ref }} ## use this one
+        GITHUB_REF: refs/tags/{{ github.event.inputs.tag }}
       run: | 
         echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
