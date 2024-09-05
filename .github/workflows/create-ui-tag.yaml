@@ -1,0 +1,39 @@
+name: Create UI Tag
+
+on:
+  push:
+    tags:
+      - 'v*'  # This will trigger on any tag starting with 'v'
+
+jobs:
+  mirror-tag:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0  # Fetch all history for all tags and branches
+
+    - name: Get the version
+      id: get_version
+      env:
+        GITHUB_REF: ${{ github.ref_name }}
+      run: | 
+        echo "ref_name: ${{ github.ref_name }}"
+        echo "ref: ${{ github.ref }}"
+        echo "head_ref: ${{ github.head_ref }}"
+        echo "base_ref: ${{ github.base_ref }}"
+        echo "action_ref: ${{ github.action_ref }}"
+        echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
+
+    - name: Create tag in target repository
+      env:
+        TARGET_REPO: rafaelbreno/rancher-ui
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git config --global user.name 'GitHub Action'
+        git config --global user.email 'action@github.com'
+        git clone https://github.com/${TARGET_REPO}.git target_repo
+        cd target_repo
+        git tag ${{ steps.get_version.outputs.VERSION }}
+        git push origin ${{ steps.get_version.outputs.VERSION }}
