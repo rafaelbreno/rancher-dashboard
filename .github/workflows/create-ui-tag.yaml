@@ -28,15 +28,35 @@ jobs:
       run: | 
         echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
+    - name: Authenticate with GitHub CLI
+      run: gh auth login --with-token <<< "${{ secrets.GITHUB_TOKEN }}"
+
     - name: Create tag in target repository
       env:
-        TARGET_REPO: "rafaelbreno/rancher-ui"
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        TARGET_REPO: rafaelbreno/rancher-ui
       run: |
-        git config --global user.name 'GitHub Action'
-        git config --global user.email 'action@github.com'
-        git clone https://${GH_TOKEN}@github.com/${TARGET_REPO}.git target_repo
+        gh repo clone ${TARGET_REPO} target_repo
         cd target_repo
-        git tag $VERSION
-        git push origin $VERSION
-        git push https://${GH_TOKEN}@github.com/${TARGET_REPO}.git $VERSION
+        gh release create ${VERSION} \
+          --target master \
+          --title "Tag test ${VERSION}"
+          
+        #gh api \
+          #--method POST \
+          #-H "Accept: application/vnd.github.v3+json" \
+          #/repos/$TARGET_REPO/git/refs \
+          #-f ref="refs/tags/$VERSION" \
+          #-f sha="$(gh api /repos/$TARGET_REPO/git/refs/heads/main --jq .object.sha)"
+
+    #- name: Create tag in target repository
+      #env:
+        #TARGET_REPO: "rafaelbreno/rancher-ui"
+        #GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #run: |
+        #git config --global user.name 'GitHub Action'
+        #git config --global user.email 'action@github.com'
+        #git clone https://${GH_TOKEN}@github.com/${TARGET_REPO}.git target_repo
+        #cd target_repo
+        #git tag $VERSION
+        #git push origin $VERSION
+        #git push https://${GH_TOKEN}@github.com/${TARGET_REPO}.git $VERSION
