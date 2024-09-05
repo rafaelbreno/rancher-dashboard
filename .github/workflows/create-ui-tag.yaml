@@ -28,7 +28,9 @@ jobs:
       run: |
         git config --global user.name 'GitHub Action'
         git config --global user.email 'action@github.com'
-        git clone https://github.com/${TARGET_REPO}.git target_repo
+        git clone https://${GH_TOKEN}@github.com/${TARGET_REPO}.git target_repo
         cd target_repo
         git tag $VERSION
         git push origin $VERSION
+        git push https://${GH_TOKEN}@github.com/${TARGET_REPO}.git $VERSION
+      run: |
